@@ -16,6 +16,7 @@ jobs:
       - name: Build with Kaniko (should fail with permission denied)
         uses: cloudbees-io/kaniko@v1
         with:
+          destination: test-image:latest
           tar-path: /cloudbees/outputs/image.tar
           dockerfile: Dockerfile
           context: .
