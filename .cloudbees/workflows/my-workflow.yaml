@@ -13,12 +13,11 @@ jobs:
       - name: Checkout code
         uses: cloudbees-io/checkout@v1
 
-      - name: Build with Kaniko (should fail with permission denied)
-        uses: docker://gcr.io/kaniko-project/executor:v1.23.2
+      - name: Build with CloudBees Kaniko Action (should fail with permission denied)
+        uses: cloudbees-io/kaniko@v1
         with:
-          entrypoint: /kaniko/executor
-          args: |
-            --dockerfile=Dockerfile
-            --context=dir:///cloudbees/workspace
-            --no-push
-            --verbosity=debug
+          destination: localhost:5000/test:latest
+          tar-path: /cloudbees/outputs/image.tar
+          dockerfile: Dockerfile
+          context: .
+          verbosity: debug
