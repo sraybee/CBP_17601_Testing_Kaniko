@@ -7,26 +7,16 @@ on:
       - "**"
   workflow_dispatch:
 
-permissions:
-  id-token: write
-
 jobs:
   test-kaniko-bug:
     steps:
       - name: Checkout code
         uses: cloudbees-io/checkout@v1
 
-      - name: Configure container registry credentials
-        uses: cloudbees-io/configure-oci-credentials@v1
-        with:
-          registry: ${{ vars.DOCKER_REGISTRY }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Build with Kaniko (should fail with permission denied)
         uses: cloudbees-io/kaniko@v1
         with:
-          destination: ${{ vars.DOCKER_REGISTRY }}/cbp-17601-test:${{ cloudbees.scm.sha }}
+          tar-path: /cloudbees/outputs/image.tar
           dockerfile: Dockerfile
           context: .
           verbosity: debug
