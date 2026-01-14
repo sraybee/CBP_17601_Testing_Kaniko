@@ -16,8 +16,7 @@ jobs:
       - name: Build with CloudBees Kaniko Action (should fail with permission denied)
         uses: cloudbees-io/kaniko@v1
         with:
-          destination: localhost:5000/test:latest
-          tar-path: /cloudbees/outputs/image.tar
+          destination: ttl.sh/cbp-17601-test:1h
           dockerfile: Dockerfile
           context: .
           verbosity: debug
