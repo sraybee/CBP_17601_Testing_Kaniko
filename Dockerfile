@@ -1,21 +1,17 @@
-FROM golang:1.20 AS builder
+FROM alpine:3.22 AS build
+RUN echo test > /test-file
 
-RUN apt-get update && apt-get install -y git
+FROM gcr.io/distroless/static:nonroot
+COPY --from=build /test-file /test-file
+COPY --from=build /bin/busybox /bin/busybox
+COPY --from=build /lib/ld-musl-* /lib/
+SHELL ["/bin/busybox", "sh", "-c"]
 
-WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
-COPY . .
-RUN chmod +x generate-sha.sh && ./generate-sha.sh
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o demo-app
+USER root
+RUN set -ex; busybox mkdir /data; busybox chown nobody /data
 
+USER nobody
+RUN set -ex; [ "`busybox cat /test-file`" = test ]; echo test2 > /data/test-file2
+RUN [ "`busybox cat /data/test-file2`" = test2 ]
 
-FROM scratch
-WORKDIR /app
-COPY --from=builder /app/demo-app /app/demo-app
-COPY --from=builder /app/templates /app/templates
-COPY --from=builder /app/static /app/static
-COPY --from=builder /app/sha.txt /app/sha.txt
-
-EXPOSE 8080
-CMD ["/app/demo-app"]
+ENTRYPOINT ["/bin/busybox", "sh"]

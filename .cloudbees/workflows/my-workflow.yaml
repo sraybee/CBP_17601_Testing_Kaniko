@@ -1,16 +1,32 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
-name: My workflow
+name: Test Kaniko Non-Root User Bug (CBP-17601)
 on:
   push:
     branches:
       - "**"
   workflow_dispatch:
+
+permissions:
+  id-token: write
+
 jobs:
-  build:
+  test-kaniko-bug:
     steps:
-      - name: Say hello
-        uses: docker://golang:1.20.3-alpine3.17
-        shell: sh
-        run: |
-          echo "hello world"
+      - name: Checkout code
+        uses: cloudbees-io/checkout@v1
+
+      - name: Configure container registry credentials
+        uses: cloudbees-io/configure-oci-credentials@v1
+        with:
+          registry: ${{ vars.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build with Kaniko (should fail with permission denied)
+        uses: cloudbees-io/kaniko@v1
+        with:
+          destination: ${{ vars.DOCKER_REGISTRY }}/cbp-17601-test:${{ cloudbees.scm.sha }}
+          dockerfile: Dockerfile
+          context: .
+          verbosity: debug
