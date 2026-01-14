@@ -1,17 +1,13 @@
-FROM alpine:3.22 AS build
-RUN echo test > /test-file
+# Use busybox as base
+FROM busybox:1.36
 
-FROM gcr.io/distroless/static:nonroot
-COPY --from=build /test-file /test-file
-COPY --from=build /bin/busybox /bin/busybox
-COPY --from=build /lib/ld-musl-* /lib/
-SHELL ["/bin/busybox", "sh", "-c"]
+# Run command as root - this works fine
+RUN echo "Running as root - this works"
 
-USER root
-RUN set -ex; busybox mkdir /data; busybox chown nobody /data
-
+# Switch to non-root user
 USER nobody
-RUN set -ex; [ "`busybox cat /test-file`" = test ]; echo test2 > /data/test-file2
-RUN [ "`busybox cat /data/test-file2`" = test2 ]
 
-ENTRYPOINT ["/bin/busybox", "sh"]
+# Try to run a command as nobody - this should fail with permission denied
+RUN echo "This should fail with permission denied"
+RUN ls -la /bin/busybox
+
