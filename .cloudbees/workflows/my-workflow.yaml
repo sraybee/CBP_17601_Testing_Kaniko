@@ -13,10 +13,10 @@ jobs:
       - name: Checkout code
         uses: cloudbees-io/checkout@v1
 
-      - name: Build with CloudBees Kaniko Action (should fail with permission denied)
+      - name: Build with CloudBees Kaniko Action (Jira Example - should fail)
         uses: cloudbees-io/kaniko@v1
         with:
-          destination: ttl.sh/cbp-17601-test:1h
-          dockerfile: Dockerfile
+          destination: ttl.sh/cbp-17601-jira-test:1h
+          dockerfile: Dockerfile.jira
           context: .
           verbosity: debug
